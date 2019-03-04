@@ -6,6 +6,11 @@ export interface MergeTag {
 export interface MergeTags {
     trigger: string;
     tags: Array<MergeTag>;
+    tagSet: string;
+}
+export interface SelectOption {
+    label: string;
+    value: string;
 }
 export interface TrixEditorProps {
     autoFocus?: boolean;
@@ -22,6 +27,8 @@ export interface TrixEditorProps {
 export interface TrixEditorState {
     showMergeTags: boolean;
     tags: Array<MergeTag>;
+    selectedMergeTag: string;
+    mergeTagSet: string;
 }
 export interface Editor {
     getSelectedRange: () => Array<number>;

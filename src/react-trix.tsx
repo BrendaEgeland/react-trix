@@ -1,4 +1,5 @@
 import * as React from "react";
+import Select from 'react-select';
 import { BoxSizingProperty } from "csstype";
 
 export interface MergeTag {
@@ -9,6 +10,12 @@ export interface MergeTag {
 export interface MergeTags {
   trigger: string;
   tags: Array<MergeTag>;
+  tagSet: string;
+}
+
+export interface SelectOption {
+  label: string;
+  value: string;
 }
 
 export interface TrixEditorProps {
@@ -28,6 +35,8 @@ export interface TrixEditorProps {
 export interface TrixEditorState {
   showMergeTags: boolean;
   tags: Array<MergeTag>;
+  selectedMergeTag: string;
+  mergeTagSet: string;
 }
 
 export interface Editor {
@@ -59,8 +68,11 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
 
     this.state = {
       showMergeTags: false,
-      tags: []
+      tags: [],
+      selectedMergeTag: '',
+      mergeTagSet: '',
     }
+    this.handleTagSelected = this.handleTagSelected.bind(this);
   }
   private generateId(): string {
     let timestamp = Date.now();
@@ -132,6 +144,7 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
           for (let i = 0; i < props.mergeTags.length; i++) {
             if (trigger == props.mergeTags[i].trigger) {
               state.showMergeTags = true;
+              state.mergeTagSet = props.mergeTags[i].tagSet || ''
               state.tags = props.mergeTags[i].tags;
               this.setState(state);
               break;
@@ -177,15 +190,13 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
     };
     return xhr.send(form);
   }
-  private handleTagSelected(t: MergeTag, e: React.MouseEvent<HTMLAnchorElement>): void {
-    e.preventDefault();
-
+  private handleTagSelected (t: SelectOption): void {
     let state: TrixEditorState = this.state;
     state.showMergeTags = false;
     this.setState(state);
 
     this.editor.expandSelectionInDirection("backward");
-    this.editor.insertString(t.tag);
+    this.editor.insertString(t.value);
   }
   private renderTagSelector(tags: Array<MergeTag>): React.ReactNode {
     if (!tags) {
@@ -193,7 +204,7 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
     }
 
     const editorPosition = document.getElementById("trix-editor-top-level").getBoundingClientRect();
-    
+
     // current cursor position
     const rect = this.editor.getClientRectAtPosition(this.editor.getSelectedRange()[0]);
     const boxStyle = {
@@ -216,11 +227,19 @@ export class TrixEditor extends React.Component<TrixEditorProps, TrixEditorState
       "padding": ".2em .5em",
       "cursor": "pointer"
     }
+    const selectOptions = tags.map( (t) => { return {label: t.name, value: t.tag} } );
+    const placeholder = `Select ${this.state.mergeTagSet}...`
     return (
       <div style={boxStyle} className="react-trix-suggestions">
-        {tags.map((t) => {
-          return <a key={t.name} style={tagStyle} href="#" onClick={this.handleTagSelected.bind(this, t)}>{t.name}</a>
-        })}
+        <Select
+          autoFocus
+          name="merge_tag_selector"
+          placeholder={placeholder}
+          value={this.state.selectedMergeTag}
+          options={selectOptions}
+          onChange={this.handleTagSelected}
+          clearable={false}
+        />
       </div>
     );
   }

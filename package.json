@@ -35,6 +35,7 @@
   },
   "homepage": "https://github.com/dstpierre/react-trix",
   "dependencies": {
+    "react-select": "^2.4.1",
     "trix": "^1.0.0"
   },
   "devDependencies": {
